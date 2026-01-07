@@ -11,8 +11,9 @@ export class MovimentacoesController {
   ) {}
 
   @Post('entrada')
-  @ApiOperation({ summary: 'Registrar entrada de veículo (esqueleto)' })
+  @ApiOperation({ summary: 'Registrar entrada de veículo' })
   registrarEntrada(@Body() dto: CreateMovimentacaoDto) {
     return this.movimentacoesService.registrarEntrada(dto);
   }
 }
+
