@@ -27,10 +27,9 @@ export class MovimentacoesService {
   ) {}
 
   async registrarEntrada(dto: CreateMovimentacaoDto) {
-    // Normalizar placa para maiúsculas
+    
     const placaNormalizada = dto.placa.toUpperCase();
 
-    // Verificar se já existe movimentação ativa para esta placa
     const movimentacaoAtiva = await this.movimentacaoRepository.findOne({
       where: {
         placa: placaNormalizada,
