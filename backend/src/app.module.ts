@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { databaseConfig } from './config/database.config';
 import { MovimentacoesModule } from './modules/movimentacoes/movimentacoes.module';
 import { TarifasModule } from './modules/tarifas/tarifas.module';
@@ -19,12 +17,10 @@ import { VagasModule } from './modules/vagas/vagas.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: databaseConfig,
-      }),
-      VagasModule,
-      TarifasModule,
-      MovimentacoesModule,
+    }),
+    VagasModule,
+    TarifasModule,
+    MovimentacoesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
