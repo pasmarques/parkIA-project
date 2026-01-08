@@ -13,6 +13,28 @@ services:
       POSTGRES_PASSWORD: parkia
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U parkia"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: parkia-app
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://parkia:parkia@postgres:5432/parkia
+      NODE_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "sleep 5 && (npm run migrate:prod 2>/dev/null || ts-node src/database/migrate.ts) && (npm run seed:prod 2>/dev/null || ts-node src/seeds/seed.ts) && node dist/main.js"
 
 volumes:
   postgres_data:

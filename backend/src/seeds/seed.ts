@@ -13,8 +13,15 @@ async function runSeed() {
     await seedTarifas(AppDataSource);
 
     console.log('Seeds finalizados com sucesso');
+    process.exit(0);
   } catch (error) {
     console.error('Erro ao rodar seeds:', error);
+    if (error instanceof Error && error.message.includes('já existe')) {
+      console.log('Dados já existem, continuando...');
+      process.exit(0);
+    } else {
+      process.exit(1);
+    }
   } finally {
     await AppDataSource.destroy();
   }

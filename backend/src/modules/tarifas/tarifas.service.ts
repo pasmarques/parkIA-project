@@ -37,7 +37,9 @@ export class TarifasService {
 
   async update(id: string, dto: UpdateTarifaDto): Promise<Tarifa> {
     const tarifa = await this.repo.findOne({ where: { id } });
-    if (!tarifa) throw new NotFoundException('Tarifa não encontrada');
+    if (!tarifa) {
+      throw new NotFoundException(`Tarifa com ID ${id} não encontrada`);
+    }
 
     if (dto.tipo_veiculo && dto.tipo_veiculo !== tarifa.tipo_veiculo) {
       const other = await this.repo.findOne({ where: { tipo_veiculo: dto.tipo_veiculo } });
