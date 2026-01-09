@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog';
 import { cn } from '@/shared/lib/utils';
+import { DashboardSkeleton } from '@/shared/components/Skeletons';
 
 export default function Dashboard() {
   const { data: stats, isLoading, isError } = useDashboard();
@@ -33,9 +34,7 @@ export default function Dashboard() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="flex h-full items-center justify-center p-8">
-          <p className="text-muted-foreground">Carregando dashboard...</p>
-        </div>
+        <DashboardSkeleton />
       </Layout>
     );
   }

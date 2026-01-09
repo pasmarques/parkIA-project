@@ -35,10 +35,11 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn, formatPlate, isValidPlate } from '@/shared/lib/utils';
+import { SpotGridSkeleton, MovimentacoesListSkeleton } from '@/shared/components/Skeletons';
 
 export default function Movimentacoes() {
-  const { data: allVagas = [] } = useVagas({ status: 'livre' });
-  const { data: activeMovimentacoes = [] } = useMovimentacoesAtivas();
+  const { data: allVagas = [], isLoading: isLoadingVagas } = useVagas({ status: 'livre' });
+  const { data: activeMovimentacoes = [], isLoading: isLoadingMovimentacoes } = useMovimentacoesAtivas();
   const { data: allTarifas = [] } = useTarifas();
   const { registrarEntrada, registrarSaida } = useMovimentacoesActions();
 
@@ -296,33 +297,39 @@ export default function Movimentacoes() {
                   <CardTitle>Vagas Disponíveis ({allVagas.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-4 gap-3">
-                    {allVagas.slice(0, 12).map((vaga) => (
-                      <button
-                        key={vaga.id}
-                        onClick={() => setEntradaForm(prev => ({ ...prev, vagaId: vaga.id }))}
-                        className={cn(
-                          "flex flex-col items-center justify-center rounded-lg border-2 p-3 transition-all hover:border-primary",
-                          entradaForm.vagaId === vaga.id 
-                            ? "border-primary bg-primary/5" 
-                            : "border-border"
-                        )}
-                      >
-                        <span className="font-semibold">{vaga.numero}</span>
-                        <span className="text-xs text-muted-foreground capitalize">
-                          {vaga.tipo === 'deficiente' ? (
-                            <span className="flex items-center gap-1">
-                              <Accessibility className="h-3 w-3" /> Deficiente
+                  {isLoadingVagas ? (
+                    <SpotGridSkeleton count={12} className="grid grid-cols-4 gap-3" />
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-4 gap-3">
+                        {allVagas.slice(0, 12).map((vaga) => (
+                          <button
+                            key={vaga.id}
+                            onClick={() => setEntradaForm(prev => ({ ...prev, vagaId: vaga.id }))}
+                            className={cn(
+                              "flex flex-col items-center justify-center rounded-lg border-2 p-3 transition-all hover:border-primary",
+                              entradaForm.vagaId === vaga.id 
+                                ? "border-primary bg-primary/5" 
+                                : "border-border"
+                            )}
+                          >
+                            <span className="font-semibold">{vaga.numero}</span>
+                            <span className="text-xs text-muted-foreground capitalize">
+                              {vaga.tipo === 'deficiente' ? (
+                                <span className="flex items-center gap-1">
+                                  <Accessibility className="h-3 w-3" /> Deficiente
+                                </span>
+                              ) : vaga.tipo === 'moto' ? 'Moto' : 'Carro'}
                             </span>
-                          ) : vaga.tipo === 'moto' ? 'Moto' : 'Carro'}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                  {allVagas.length > 12 && (
-                    <p className="mt-4 text-center text-sm text-muted-foreground">
-                      +{allVagas.length - 12} vagas disponíveis
-                    </p>
+                          </button>
+                        ))}
+                      </div>
+                      {allVagas.length > 12 && (
+                        <p className="mt-4 text-center text-sm text-muted-foreground">
+                          +{allVagas.length - 12} vagas disponíveis
+                        </p>
+                      )}
+                    </>
                   )}
                 </CardContent>
               </Card>
@@ -373,7 +380,9 @@ export default function Movimentacoes() {
                 <CardContent className="p-0">
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-1 p-4 pt-0">
-                      {activeMovimentacoes.length === 0 ? (
+                      {isLoadingMovimentacoes ? (
+                        <MovimentacoesListSkeleton />
+                      ) : activeMovimentacoes.length === 0 ? (
                         <div className="py-8 text-center text-muted-foreground">
                           <Car className="mx-auto mb-2 h-12 w-12 opacity-50" />
                           <p>Nenhum veículo no pátio</p>
