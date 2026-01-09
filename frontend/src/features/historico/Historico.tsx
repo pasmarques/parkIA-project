@@ -22,6 +22,7 @@ import { useHistoricoMovimentacoes } from '@/shared/hooks/useMovimentacoes';
 import { History, Search, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { exportarHistoricoPdf } from './utils/exportarHistoricoPdf';
 
 export default function Historico() {
   const [dataInicio, setDataInicio] = useState('');
@@ -52,7 +53,12 @@ export default function Historico() {
               Consulte movimentações anteriores
             </p>
           </div>
-          <Button variant="outline" className="gap-2">
+          <Button 
+            variant="outline" 
+            className="gap-2"
+            onClick={() => exportarHistoricoPdf(filteredHistorico, { inicio: dataInicio, fim: dataFim })}
+            disabled={filteredHistorico.length === 0}
+          >
             <Download className="h-4 w-4" />
             Exportar
           </Button>
