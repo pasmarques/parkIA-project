@@ -157,6 +157,73 @@ export function Vagas() {
         </CardContent>
       </Card>
 
+      <Dialog open={!!editingVaga} onOpenChange={(open) => !open && setEditingVaga(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Vaga</DialogTitle>
+            <DialogDescription>
+              Altere os dados da vaga {editingVaga?.numero}
+            </DialogDescription>
+          </DialogHeader>
+          {editingVaga && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Número</Label>
+                <Input
+                  value={editingVaga.numero}
+                  onChange={(e) => setEditingVaga(prev => 
+                    prev ? { ...prev, numero: e.target.value.toUpperCase() } : null
+                  )}
+                  className="font-mono uppercase"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo</Label>
+                <Select
+                  value={editingVaga.tipo}
+                  onValueChange={(value) => setEditingVaga(prev => 
+                    prev ? { ...prev, tipo: value as SpotType } : null
+                  )}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="carro">Carro</SelectItem>
+                    <SelectItem value="moto">Moto</SelectItem>
+                    <SelectItem value="deficiente">PCD</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={editingVaga.status}
+                  onValueChange={(value) => setEditingVaga(prev => 
+                    prev ? { ...prev, status: value as SpotStatus } : null
+                  )}
+                  disabled={editingVaga.status === 'ocupada'}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="livre">Livre</SelectItem>
+                    <SelectItem value="ocupada" disabled>Ocupada</SelectItem>
+                    <SelectItem value="manutencao">Manutenção</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={handleEditarVaga}>
+              Salvar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -197,81 +264,13 @@ export function Vagas() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setEditingVaga({ ...vaga })}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Editar Vaga</DialogTitle>
-                            <DialogDescription>
-                              Altere os dados da vaga {vaga.numero}
-                            </DialogDescription>
-                          </DialogHeader>
-                          {editingVaga && (
-                            <div className="space-y-4">
-                              <div className="space-y-2">
-                                <Label>Número</Label>
-                                <Input
-                                  value={editingVaga.numero}
-                                  onChange={(e) => setEditingVaga(prev => 
-                                    prev ? { ...prev, numero: e.target.value.toUpperCase() } : null
-                                  )}
-                                  className="font-mono uppercase"
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Tipo</Label>
-                                <Select
-                                  value={editingVaga.tipo}
-                                  onValueChange={(value) => setEditingVaga(prev => 
-                                    prev ? { ...prev, tipo: value as SpotType } : null
-                                  )}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="carro">Carro</SelectItem>
-                                    <SelectItem value="moto">Moto</SelectItem>
-                                    <SelectItem value="deficiente">PCD</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Status</Label>
-                                <Select
-                                  value={editingVaga.status}
-                                  onValueChange={(value) => setEditingVaga(prev => 
-                                    prev ? { ...prev, status: value as SpotStatus } : null
-                                  )}
-                                  disabled={editingVaga.status === 'ocupada'}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="livre">Livre</SelectItem>
-                                    <SelectItem value="ocupada" disabled>Ocupada</SelectItem>
-                                    <SelectItem value="manutencao">Manutenção</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                          )}
-                          <DialogFooter>
-                            <Button onClick={handleEditarVaga}>
-                              Salvar Alterações
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setEditingVaga({ ...vaga })}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
