@@ -11,17 +11,6 @@ export interface Vaga {
   updated_at: string;
 }
 
-export interface Movimentacao {
-  id: string;
-  vaga_id: string;
-  vaga?: Vaga;
-  placa: string;
-  tipo_veiculo: VehicleType;
-  entrada: string;
-  saida: string | null;
-  valor_pago: number | null;
-}
-
 export interface Tarifa {
   id: string;
   tipo_veiculo: VehicleType;
@@ -30,11 +19,68 @@ export interface Tarifa {
   tolerancia_minutos: number;
 }
 
-export interface Estatisticas {
+export interface Movimentacao {
+  id: string;
+  vaga: Vaga;
+  placa: string;
+  tipo_veiculo: VehicleType;
+  entrada: string;
+  saida: string | null;
+  valor_pago: number | null;
+}
+
+export interface SaidaResponse extends Movimentacao {
+  tempo_permanencia_minutos: number;
+  tarifa_aplicada: {
+    tipo_veiculo: VehicleType;
+    valor_primeira_hora: number;
+    valor_hora_adicional: number;
+    tolerancia_minutos: number;
+  };
+}
+
+export interface VagaEstatisticasDto {
   total: number;
   ocupadas: number;
   livres: number;
-  manutencao: number;
-  percentual_ocupacao: number;
-  receita_dia: number;
+  percentualOcupacao: number;
+}
+
+// DTOs para criação e atualização
+
+export interface CreateVagaDto {
+  numero: string;
+  tipo: SpotType;
+  status: SpotStatus;
+}
+
+export interface UpdateVagaDto extends Partial<CreateVagaDto> {}
+
+export interface VagaFilterDto {
+  status?: SpotStatus;
+  tipo?: SpotType;
+}
+
+export interface CreateTarifaDto {
+  tipo_veiculo: VehicleType;
+  valor_primeira_hora: number;
+  valor_hora_adicional: number;
+  tolerancia_minutos?: number;
+}
+
+export interface UpdateTarifaDto extends Partial<CreateTarifaDto> {}
+
+export interface CreateMovimentacaoDto {
+  vagaId: string;
+  placa: string;
+  tipoVeiculo: VehicleType;
+}
+
+export interface RegistrarSaidaDto {
+  placa: string;
+}
+
+export interface HistoricoFilterDto {
+  dataInicio?: string;
+  dataFim?: string;
 }
