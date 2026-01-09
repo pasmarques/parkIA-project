@@ -27,7 +27,7 @@ import {
   DialogTrigger,
 } from '@/shared/ui/dialog';
 import { useTarifas } from '@/shared/hooks/useTarifas';
-import { DollarSign, Pencil } from 'lucide-react';
+import { DollarSign, Pencil, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tarifa } from '@/shared/types/parking';
 
@@ -38,10 +38,12 @@ export function Tarifas() {
     valor_hora_adicional: string | number;
     tolerancia_minutos: string | number;
   }) | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleEditarTarifa = async () => {
     if (!editingTarifa) return;
 
+    setIsUpdating(true);
     try {
       await updateTarifa({
         id: editingTarifa.id,
@@ -62,6 +64,8 @@ export function Tarifas() {
       } else {
         toast.error('Erro ao atualizar tarifa');
       }
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -152,7 +156,8 @@ export function Tarifas() {
             </div>
           )}
           <DialogFooter>
-            <Button onClick={handleEditarTarifa}>
+            <Button onClick={handleEditarTarifa} disabled={isUpdating}>
+              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Salvar Alterações
             </Button>
           </DialogFooter>

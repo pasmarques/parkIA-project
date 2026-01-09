@@ -41,5 +41,8 @@ export function useVagas(filter?: VagaFilterDto) {
     createVaga: createMutation.mutateAsync,
     updateVaga: updateMutation.mutateAsync,
     deleteVaga: deleteMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
   };
 }

@@ -21,5 +21,6 @@ export function useTarifas() {
   return {
     ...query,
     updateTarifa: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
   };
 }

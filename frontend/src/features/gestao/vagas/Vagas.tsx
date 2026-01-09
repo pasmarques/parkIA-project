@@ -34,13 +34,13 @@ import {
   DialogTrigger,
 } from '@/shared/ui/dialog';
 import { Vaga, SpotStatus, SpotType } from '@/shared/types/parking';
-import { Plus, Pencil, Trash2, Settings } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useVagas } from '@/shared/hooks/useVagas';
 
 export function Vagas() {
-  const { data: allVagas = [], createVaga, updateVaga, deleteVaga } = useVagas();
+  const { data: allVagas = [], createVaga, updateVaga, deleteVaga, isCreating, isUpdating, isDeleting } = useVagas();
   const [novaVaga, setNovaVaga] = useState({
     numero: '',
     tipo: 'carro' as SpotType,
@@ -293,7 +293,7 @@ export function Vagas() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleExcluirVaga(vaga)}
-                        disabled={vaga.status === 'ocupada'}
+                        disabled={vaga.status === 'ocupada' || isDeleting}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>

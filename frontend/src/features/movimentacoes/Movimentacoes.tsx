@@ -30,7 +30,7 @@ import { useVagas } from '@/shared/hooks/useVagas';
 import { useTarifas } from '@/shared/hooks/useTarifas';
 import { useMovimentacoesAtivas, useMovimentacoesActions } from '@/shared/hooks/useMovimentacoes';
 import { VehicleType } from '@/shared/types/parking';
-import { LogIn, LogOut, Car, Bike, Clock, CheckCircle, Accessibility } from 'lucide-react';
+import { LogIn, LogOut, Car, Bike, Clock, CheckCircle, Accessibility, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -53,6 +53,7 @@ export default function Movimentacoes() {
     valor: number;
     tempo: string;
   } | null>(null);
+  const [isSaidaPending, setIsSaidaPending] = useState(false);
 
   const validarPlaca = (placa: string): boolean => {
     const padrao1 = /^[A-Z]{3}-\d{4}$/;
@@ -162,6 +163,7 @@ export default function Movimentacoes() {
   const handleConfirmarSaida = async () => {
     if (!saidaDialog) return;
 
+    setIsSaidaPending(true);
     try {
       const mov = await registrarSaida({ placa: saidaDialog.placa });
       
@@ -178,6 +180,8 @@ export default function Movimentacoes() {
       } else {
         toast.error('Erro ao registrar saída');
       }
+    } finally {
+      setIsSaidaPending(false);
     }
   };
 
@@ -459,8 +463,15 @@ export default function Movimentacoes() {
             <Button variant="outline" onClick={() => setSaidaDialog(null)}>
               Cancelar
             </Button>
-            <Button onClick={handleConfirmarSaida}>
-              Confirmar Saída
+            <Button onClick={handleConfirmarSaida} disabled={isSaidaPending}>
+              {isSaidaPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Confirmando...
+                </>
+              ) : (
+                'Confirmar Saída'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
