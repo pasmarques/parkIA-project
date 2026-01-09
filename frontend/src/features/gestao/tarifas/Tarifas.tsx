@@ -29,6 +29,7 @@ import {
 import { useTarifas } from '@/shared/hooks/useTarifas';
 import { DollarSign, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
+import { Tarifa } from '@/shared/types/parking';
 
 export function Tarifas() {
   const { data: allTarifas = [], updateTarifa } = useTarifas();
@@ -48,9 +49,15 @@ export function Tarifas() {
       });
       setEditingTarifa(null);
       toast.success('Tarifa atualizada com sucesso');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('Erro ao atualizar tarifa');
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+         const message = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
+         toast.error(message);
+      } else {
+        toast.error('Erro ao atualizar tarifa');
+      }
     }
   };
 

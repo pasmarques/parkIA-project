@@ -66,9 +66,15 @@ export function Vagas() {
       });
       setNovaVaga({ numero: '', tipo: 'carro' });
       toast.success(`Vaga ${novaVaga.numero.toUpperCase()} criada com sucesso`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('Erro ao criar vaga');
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+         const message = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
+         toast.error(message);
+      } else {
+        toast.error('Erro ao criar vaga');
+      }
     }
   };
 
@@ -86,9 +92,15 @@ export function Vagas() {
       });
       setEditingVaga(null);
       toast.success('Vaga atualizada com sucesso');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('Erro ao atualizar vaga');
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+         const message = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
+         toast.error(message);
+      } else {
+        toast.error('Erro ao atualizar vaga');
+      }
     }
   };
 
@@ -101,9 +113,15 @@ export function Vagas() {
     try {
       await deleteVaga(vaga.id);
       toast.success(`Vaga ${vaga.numero} excluída`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('Erro ao excluir vaga');
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+         const message = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
+         toast.error(message);
+      } else {
+        toast.error('Erro ao excluir vaga');
+      }
     }
   };
 
