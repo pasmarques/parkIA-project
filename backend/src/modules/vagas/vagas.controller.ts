@@ -124,9 +124,10 @@ export class VagasController {
 
   @Delete(':id')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Remover vaga (não permitido se ocupada)' })
+  @ApiOperation({ summary: 'Remover vaga (não permitido se ocupada ou com movimentações)' })
   @ApiResponse({ status: 204, description: 'Vaga removida com sucesso' })
   @ApiResponse({ status: 400, description: 'Não é permitido excluir vaga ocupada' })
+  @ApiResponse({ status: 409, description: 'Não é permitido excluir vaga com movimentações registradas' })
   async remove(@Param('id') id: string): Promise<void> {
     return this.vagasService.remove(id);
   }

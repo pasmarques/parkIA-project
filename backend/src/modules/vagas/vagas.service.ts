@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Vaga } from './entities/vaga.entity';
@@ -63,6 +63,11 @@ export class VagasService {
 
     if (vaga.status === StatusVaga.OCUPADA) {
       throw new BadRequestException('Não é permitido excluir vaga ocupada');
+    }
+
+    const hasMovimentacoes = await this.movRepo.count({ where: { vaga: { id } } });
+    if (hasMovimentacoes > 0) {
+      throw new ConflictException('Não é permitido excluir vaga com movimentações registradas');
     }
 
     await this.repo.remove(vaga);

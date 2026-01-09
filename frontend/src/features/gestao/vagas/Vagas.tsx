@@ -33,6 +33,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/ui/alert-dialog";
 import { Vaga, SpotStatus, SpotType } from '@/shared/types/parking';
 import { Plus, Pencil, Trash2, Settings, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -46,6 +56,7 @@ export function Vagas() {
     tipo: 'carro' as SpotType,
   });
   const [editingVaga, setEditingVaga] = useState<Vaga | null>(null);
+  const [vagaToDelete, setVagaToDelete] = useState<Vaga | null>(null);
 
   const handleCriarVaga = async () => {
     if (!novaVaga.numero) {
@@ -104,15 +115,17 @@ export function Vagas() {
     }
   };
 
-  const handleExcluirVaga = async (vaga: Vaga) => {
-    if (vaga.status === 'ocupada') {
+  const handleExcluirVaga = async () => {
+    if (!vagaToDelete) return;
+
+    if (vagaToDelete.status === 'ocupada') {
       toast.error('Não é possível excluir uma vaga ocupada');
       return;
     }
 
     try {
-      await deleteVaga(vaga.id);
-      toast.success(`Vaga ${vaga.numero} excluída`);
+      await deleteVaga(vagaToDelete.id);
+      toast.success(`Vaga ${vagaToDelete.numero} excluída`);
     } catch (error: any) {
       console.error(error);
       const errorMessage = error.response?.data?.message;
@@ -122,6 +135,8 @@ export function Vagas() {
       } else {
         toast.error('Erro ao excluir vaga');
       }
+    } finally {
+      setVagaToDelete(null);
     }
   };
 
@@ -292,8 +307,8 @@ export function Vagas() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleExcluirVaga(vaga)}
-                        disabled={vaga.status === 'ocupada' || isDeleting}
+                        onClick={() => setVagaToDelete(vaga)}
+                        disabled={vaga.status !== 'livre' || isDeleting}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -305,6 +320,39 @@ export function Vagas() {
           </Table>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!vagaToDelete} onOpenChange={(open) => !open && setVagaToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Tem certeza que deseja excluir esta vaga?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Isso excluirá permanentemente a vaga 
+              <span className="font-mono font-bold mx-1">{vagaToDelete?.numero}</span>
+              e removerá seus dados dos nossos servidores.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e) => {
+                e.preventDefault();
+                handleExcluirVaga();
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Excluindo...
+                </>
+              ) : (
+                'Excluir'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

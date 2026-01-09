@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { VagasModule } from './vagas.module';
 import { Vaga } from './entities/vaga.entity';
 import { Movimentacao } from '../movimentacoes/entities/movimentacao.entity';
@@ -10,6 +11,7 @@ import { StatusVaga } from '../../common/enums/status-vaga.enum';
 
 describe('VagasController (e2e)', () => {
   let app: INestApplication;
+  let movRepo: Repository<Movimentacao>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -40,6 +42,7 @@ describe('VagasController (e2e)', () => {
       }),
     );
     await app.init();
+    movRepo = moduleFixture.get(getRepositoryToken(Movimentacao));
   });
 
   afterAll(async () => {
@@ -215,6 +218,27 @@ describe('VagasController (e2e)', () => {
       return request(app.getHttpServer())
         .delete(`/api/v1/vagas/${vaga.body.id}`)
         .expect(204);
+    });
+
+    it('deve retornar erro 409 se vaga tem movimentações', async () => {
+      const vaga = await request(app.getHttpServer())
+        .post('/api/v1/vagas')
+        .send({
+          numero: 'F3',
+          tipo: TipoVaga.CARRO,
+          status: StatusVaga.LIVRE,
+        });
+
+      await movRepo.save({
+        vaga: { id: vaga.body.id },
+        placa: 'ABC-1234',
+        tipo_veiculo: 'carro' as any,
+        entrada: new Date(),
+      });
+
+      return request(app.getHttpServer())
+        .delete(`/api/v1/vagas/${vaga.body.id}`)
+        .expect(409);
     });
 
     it('deve retornar erro 400 se tentar deletar vaga ocupada', async () => {
