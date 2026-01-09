@@ -61,6 +61,7 @@ A maneira mais simples de testar a aplicação é utilizando o Docker Compose. I
    - **Frontend:** [http://localhost](http://localhost)
    - **Backend API:** [http://localhost:3000/api/v1](http://localhost:3000/api/v1)
    - **Documentação API (Swagger):** [http://localhost:3000/api](http://localhost:3000/api)
+     > 💡 **Dica:** Para verificar **exemplos de uso da API**, esquemas de dados e realizar testes, utilize a documentação interativa do Swagger.
 
 > **Nota:** O build inicial pode levar alguns minutos. O frontend estará disponível na porta 80 e o backend na porta 3000.
 
@@ -88,22 +89,13 @@ npm install
 npm run dev
 ```
 
----
+### 4. Acessando a Aplicação
+Após iniciar os serviços, você pode acessar:
 
-## ☁️ Deploy (Guia de Implantação)
-
-### Backend (Render.com)
-O backend está hospedado no Render, que oferece suporte nativo a Node.js e PostgreSQL.
-1. Crie um Web Service conectado ao repositório.
-2. Build Command: `npm install && npm run build`
-3. Start Command: `npm run start:prod`
-4. Defina as variáveis de ambiente (`DB_HOST`, `DB_PASSWORD`, etc).
-
-### Frontend (Vercel)
-O frontend está hospedado na Vercel.
-1. Importe o projeto do GitHub.
-2. Defina a variável de ambiente `VITE_API_URL` apontando para a URL do backend no Render.
-3. O deploy é automático.
+- **Frontend:** [http://localhost:5173](http://localhost:5173) (ou a porta indicada no terminal)
+- **API:** [http://localhost:3000/api/v1](http://localhost:3000/api/v1)
+- **Documentação Swagger:** [http://localhost:3000/api](http://localhost:3000/api)
+  > 💡 **Dica:** Utilize o Swagger para visualizar **exemplos de requisições**, respostas e testar os endpoints da API.
 
 ---
 
