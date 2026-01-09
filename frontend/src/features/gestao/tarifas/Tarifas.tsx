@@ -33,7 +33,11 @@ import { Tarifa } from '@/shared/types/parking';
 
 export function Tarifas() {
   const { data: allTarifas = [], updateTarifa } = useTarifas();
-  const [editingTarifa, setEditingTarifa] = useState<Tarifa | null>(null);
+  const [editingTarifa, setEditingTarifa] = useState<(Omit<Tarifa, 'valor_primeira_hora' | 'valor_hora_adicional' | 'tolerancia_minutos'> & {
+    valor_primeira_hora: string | number;
+    valor_hora_adicional: string | number;
+    tolerancia_minutos: string | number;
+  }) | null>(null);
 
   const handleEditarTarifa = async () => {
     if (!editingTarifa) return;
@@ -42,9 +46,9 @@ export function Tarifas() {
       await updateTarifa({
         id: editingTarifa.id,
         data: {
-          valor_primeira_hora: editingTarifa.valor_primeira_hora,
-          valor_hora_adicional: editingTarifa.valor_hora_adicional,
-          tolerancia_minutos: editingTarifa.tolerancia_minutos,
+          valor_primeira_hora: Number(editingTarifa.valor_primeira_hora),
+          valor_hora_adicional: Number(editingTarifa.valor_hora_adicional),
+          tolerancia_minutos: Number(editingTarifa.tolerancia_minutos),
         }
       });
       setEditingTarifa(null);
@@ -94,66 +98,13 @@ export function Tarifas() {
                   <TableCell>R$ {Number(tarifa.valor_hora_adicional).toFixed(2)}</TableCell>
                   <TableCell>{tarifa.tolerancia_minutos} min</TableCell>
                   <TableCell className="text-right">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setEditingTarifa({ ...tarifa })}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Editar Tarifa</DialogTitle>
-                          <DialogDescription>
-                            Altere os valores para {tarifa.tipo_veiculo}
-                          </DialogDescription>
-                        </DialogHeader>
-                        {editingTarifa && (
-                          <div className="space-y-4">
-                            <div className="space-y-2">
-                              <Label>Valor 1ª Hora (R$)</Label>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                value={editingTarifa.valor_primeira_hora}
-                                onChange={(e) => setEditingTarifa(prev => 
-                                  prev ? { ...prev, valor_primeira_hora: parseFloat(e.target.value) || 0 } : null
-                                )}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Valor Hora Adicional (R$)</Label>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                value={editingTarifa.valor_hora_adicional}
-                                onChange={(e) => setEditingTarifa(prev => 
-                                  prev ? { ...prev, valor_hora_adicional: parseFloat(e.target.value) || 0 } : null
-                                )}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Tolerância (minutos)</Label>
-                              <Input
-                                type="number"
-                                value={editingTarifa.tolerancia_minutos}
-                                onChange={(e) => setEditingTarifa(prev => 
-                                  prev ? { ...prev, tolerancia_minutos: parseInt(e.target.value) || 0 } : null
-                                )}
-                              />
-                            </div>
-                          </div>
-                        )}
-                        <DialogFooter>
-                          <Button onClick={handleEditarTarifa}>
-                            Salvar Alterações
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEditingTarifa({ ...tarifa })}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -161,6 +112,52 @@ export function Tarifas() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={!!editingTarifa} onOpenChange={(open) => !open && setEditingTarifa(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Tarifa</DialogTitle>
+            <DialogDescription>
+              Altere os valores para {editingTarifa?.tipo_veiculo}
+            </DialogDescription>
+          </DialogHeader>
+          {editingTarifa && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Valor 1ª Hora (R$)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={editingTarifa.valor_primeira_hora}
+                  onChange={(e) => setEditingTarifa(prev => prev ? { ...prev, valor_primeira_hora: e.target.value } : null)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Valor Hora Adicional (R$)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={editingTarifa.valor_hora_adicional}
+                  onChange={(e) => setEditingTarifa(prev => prev ? { ...prev, valor_hora_adicional: e.target.value } : null)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Tolerância (minutos)</Label>
+                <Input
+                  type="number"
+                  value={editingTarifa.tolerancia_minutos}
+                  onChange={(e) => setEditingTarifa(prev => prev ? { ...prev, tolerancia_minutos: e.target.value } : null)}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button onClick={handleEditarTarifa}>
+              Salvar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
