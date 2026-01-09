@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { TipoVeiculo } from '../../../common/enums/tipo-veiculo.enum';
+import { ColumnNumericTransformer } from '../../../common/transformers/numeric.transformer';
 
 @Entity('tarifas')
 export class Tarifa {
@@ -9,10 +10,10 @@ export class Tarifa {
   @Column({ type: 'enum', enum: TipoVeiculo })
   tipo_veiculo!: TipoVeiculo;
 
-  @Column('decimal')
+  @Column('decimal', { transformer: new ColumnNumericTransformer() })
   valor_primeira_hora!: number;
 
-  @Column('decimal')
+  @Column('decimal', { transformer: new ColumnNumericTransformer() })
   valor_hora_adicional!: number;
 
   @Column({ default: 15 })

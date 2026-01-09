@@ -83,8 +83,8 @@ export function Tarifas() {
                   <TableCell className="font-medium capitalize">
                     {tarifa.tipo_veiculo}
                   </TableCell>
-                  <TableCell>R$ {tarifa.valor_primeira_hora.toFixed(2)}</TableCell>
-                  <TableCell>R$ {tarifa.valor_hora_adicional.toFixed(2)}</TableCell>
+                  <TableCell>R$ {Number(tarifa.valor_primeira_hora).toFixed(2)}</TableCell>
+                  <TableCell>R$ {Number(tarifa.valor_hora_adicional).toFixed(2)}</TableCell>
                   <TableCell>{tarifa.tolerancia_minutos} min</TableCell>
                   <TableCell className="text-right">
                     <Dialog>

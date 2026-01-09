@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Vaga } from '../../vagas/entities/vaga.entity';
 import { TipoVeiculo } from '../../../common/enums/tipo-veiculo.enum';
+import { ColumnNumericTransformer } from '../../../common/transformers/numeric.transformer';
 
 @Entity('movimentacoes')
 export class Movimentacao {
@@ -29,6 +30,6 @@ export class Movimentacao {
   @Column({ type: 'timestamp', nullable: true })
   saida!: Date;
 
-  @Column({ type: 'decimal', nullable: true })
+  @Column({ type: 'decimal', nullable: true, transformer: new ColumnNumericTransformer() })
   valor_pago!: number;
 }

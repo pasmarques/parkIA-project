@@ -152,7 +152,7 @@ export default function Historico() {
                           : '-'}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        R$ {(mov.valor_pago || 0).toFixed(2)}
+                        R$ {Number(mov.valor_pago || 0).toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}

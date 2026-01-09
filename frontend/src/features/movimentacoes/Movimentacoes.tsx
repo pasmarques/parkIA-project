@@ -73,11 +73,14 @@ export default function Movimentacoes() {
 
     const diffHours = Math.ceil(diffMinutes / 60);
     
+    const valorPrimeiraHora = Number(tarifa.valor_primeira_hora);
+    const valorHoraAdicional = Number(tarifa.valor_hora_adicional);
+
     if (diffHours <= 1) {
-      return tarifa.valor_primeira_hora;
+      return valorPrimeiraHora;
     }
 
-    return tarifa.valor_primeira_hora + (diffHours - 1) * tarifa.valor_hora_adicional;
+    return valorPrimeiraHora + (diffHours - 1) * valorHoraAdicional;
   };
 
   const handleEntrada = async () => {
@@ -129,8 +132,13 @@ export default function Movimentacoes() {
         return;
       }
 
-      const valor = calcularValor(entradaDate, new Date(), mov.tipo_veiculo);
-      const tempo = formatDistanceToNow(entradaDate, { locale: ptBR });
+      let valor = calcularValor(entradaDate, new Date(), mov.tipo_veiculo);
+      if (typeof valor !== 'number' || isNaN(valor)) {
+        console.warn('Valor calculado inválido, definindo como 0');
+        valor = 0;
+      }
+
+      const tempo = formatDuration(entradaDate);
 
       setSaidaDialog({
         placa: mov.placa,
@@ -138,7 +146,7 @@ export default function Movimentacoes() {
         tempo,
       });
     } catch (error) {
-      console.error('Erro ao processar movimentação:', error);
+      console.error('Erro ao processar movimentação:', error, mov);
       toast.error('Erro ao processar dados da movimentação');
     }
   };
@@ -336,7 +344,7 @@ export default function Movimentacoes() {
                         className="plate-input flex-1"
                         maxLength={8}
                       />
-                      <Button onClick={() => handleBuscarSaida()} variant="outline">
+                      <Button type="button" onClick={() => handleBuscarSaida()} variant="outline">
                         Buscar
                       </Button>
                     </div>
@@ -421,7 +429,7 @@ export default function Movimentacoes() {
                 <div className="flex justify-between border-t border-border pt-3">
                   <span className="text-muted-foreground">Valor a pagar</span>
                   <span className="text-2xl font-bold text-primary">
-                    R$ {saidaDialog.valor.toFixed(2)}
+                    R$ {typeof saidaDialog.valor === 'number' && !isNaN(saidaDialog.valor) ? saidaDialog.valor.toFixed(2) : '0.00'}
                   </span>
                 </div>
               </div>
