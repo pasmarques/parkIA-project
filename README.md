@@ -5,7 +5,18 @@ O **ParkIA** é uma solução completa para gerenciamento de estacionamentos, co
 ## 🚀 Demonstração Online
 
 Você pode acessar a aplicação rodando em produção aqui:
-**[Link da Aplicação (Deploy)]** (Preencher após deploy)
+👉 **[Acessar ParkIA - Demo Online](https://park-ia-project-ai01ip5x8-pedrivis-projects.vercel.app/)**
+
+### ⚠️ Observação Importante (Limitações do Servidor Gratuito)
+
+O backend desta aplicação está hospedado no plano gratuito do **Render**. Devido às políticas deste plano, o serviço entra em modo de suspensão (dormência) após **15 minutos de inatividade**.
+
+**Impacto para o usuário:**
+- O primeiro acesso (login ou carregamento de dados) pode levar de **50 segundos a 1 minuto** para ser processado.
+- Esse fenômeno é conhecido como **"Cold Start"** (Inicialização a Frio).
+- Após o servidor "acordar", a performance volta ao normal e o sistema responde rapidamente.
+
+Se o carregamento inicial parecer lento, por favor, aguarde um momento. ☕
 
 ---
 
