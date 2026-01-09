@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Layout } from '@/shared/components/Layout';
 import {
   Tabs,
@@ -6,16 +5,11 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/shared/ui/tabs';
-import { vagas as initialVagas, tarifas as initialTarifas } from '@/shared/services/mockData';
-import { Vaga, Tarifa } from '@/shared/types/parking';
 import { ParkingCircle, DollarSign } from 'lucide-react';
 import { Vagas } from './vagas/Vagas';
 import { Tarifas } from './tarifas/Tarifas';
 
 export default function Gestao() {
-  const [allVagas, setAllVagas] = useState<Vaga[]>(initialVagas);
-  const [allTarifas, setAllTarifas] = useState<Tarifa[]>(initialTarifas);
-
   return (
     <Layout>
       <div className="space-y-8">
@@ -40,11 +34,11 @@ export default function Gestao() {
           </TabsList>
 
           <TabsContent value="vagas">
-            <Vagas vagas={allVagas} onUpdateVagas={setAllVagas} />
+            <Vagas />
           </TabsContent>
 
           <TabsContent value="tarifas">
-            <Tarifas tarifas={allTarifas} onUpdateTarifas={setAllTarifas} />
+            <Tarifas />
           </TabsContent>
         </Tabs>
       </div>

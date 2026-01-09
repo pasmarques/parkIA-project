@@ -37,19 +37,17 @@ import { Vaga, SpotStatus, SpotType } from '@/shared/types/parking';
 import { Plus, Pencil, Trash2, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface VagasProps {
-  vagas: Vaga[];
-  onUpdateVagas: (vagas: Vaga[]) => void;
-}
+import { useVagas } from '@/shared/hooks/useVagas';
 
-export function Vagas({ vagas: allVagas, onUpdateVagas: setAllVagas }: VagasProps) {
+export function Vagas() {
+  const { data: allVagas = [], createVaga, updateVaga, deleteVaga } = useVagas();
   const [novaVaga, setNovaVaga] = useState({
     numero: '',
     tipo: 'carro' as SpotType,
   });
   const [editingVaga, setEditingVaga] = useState<Vaga | null>(null);
 
-  const handleCriarVaga = () => {
+  const handleCriarVaga = async () => {
     if (!novaVaga.numero) {
       toast.error('Digite o número da vaga');
       return;
@@ -60,40 +58,53 @@ export function Vagas({ vagas: allVagas, onUpdateVagas: setAllVagas }: VagasProp
       return;
     }
 
-    const nova: Vaga = {
-      id: `vaga-${Date.now()}`,
-      numero: novaVaga.numero.toUpperCase(),
-      status: 'livre',
-      tipo: novaVaga.tipo,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    setAllVagas([...allVagas, nova]);
-    setNovaVaga({ numero: '', tipo: 'carro' });
-    toast.success(`Vaga ${nova.numero} criada com sucesso`);
+    try {
+      await createVaga({
+        numero: novaVaga.numero.toUpperCase(),
+        tipo: novaVaga.tipo,
+        status: 'livre'
+      });
+      setNovaVaga({ numero: '', tipo: 'carro' });
+      toast.success(`Vaga ${novaVaga.numero.toUpperCase()} criada com sucesso`);
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao criar vaga');
+    }
   };
 
-  const handleEditarVaga = () => {
+  const handleEditarVaga = async () => {
     if (!editingVaga) return;
 
-    setAllVagas(allVagas.map(v => 
-      v.id === editingVaga.id 
-        ? { ...editingVaga, updated_at: new Date().toISOString() }
-        : v
-    ));
-    setEditingVaga(null);
-    toast.success('Vaga atualizada com sucesso');
+    try {
+      await updateVaga({
+        id: editingVaga.id,
+        data: {
+          numero: editingVaga.numero,
+          tipo: editingVaga.tipo,
+          status: editingVaga.status
+        }
+      });
+      setEditingVaga(null);
+      toast.success('Vaga atualizada com sucesso');
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao atualizar vaga');
+    }
   };
 
-  const handleExcluirVaga = (vaga: Vaga) => {
+  const handleExcluirVaga = async (vaga: Vaga) => {
     if (vaga.status === 'ocupada') {
       toast.error('Não é possível excluir uma vaga ocupada');
       return;
     }
 
-    setAllVagas(allVagas.filter(v => v.id !== vaga.id));
-    toast.success(`Vaga ${vaga.numero} excluída`);
+    try {
+      await deleteVaga(vaga.id);
+      toast.success(`Vaga ${vaga.numero} excluída`);
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao excluir vaga');
+    }
   };
 
   return (

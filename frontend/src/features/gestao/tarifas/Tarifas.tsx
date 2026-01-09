@@ -26,26 +26,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/ui/dialog';
-import { Tarifa } from '@/shared/types/parking';
+import { useTarifas } from '@/shared/hooks/useTarifas';
 import { DollarSign, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface TarifasProps {
-  tarifas: Tarifa[];
-  onUpdateTarifas: (tarifas: Tarifa[]) => void;
-}
-
-export function Tarifas({ tarifas: allTarifas, onUpdateTarifas: setAllTarifas }: TarifasProps) {
+export function Tarifas() {
+  const { data: allTarifas = [], updateTarifa } = useTarifas();
   const [editingTarifa, setEditingTarifa] = useState<Tarifa | null>(null);
 
-  const handleEditarTarifa = () => {
+  const handleEditarTarifa = async () => {
     if (!editingTarifa) return;
 
-    setAllTarifas(allTarifas.map(t => 
-      t.id === editingTarifa.id ? editingTarifa : t
-    ));
-    setEditingTarifa(null);
-    toast.success('Tarifa atualizada com sucesso');
+    try {
+      await updateTarifa({
+        id: editingTarifa.id,
+        data: {
+          valor_primeira_hora: editingTarifa.valor_primeira_hora,
+          valor_hora_adicional: editingTarifa.valor_hora_adicional,
+          tolerancia_minutos: editingTarifa.tolerancia_minutos,
+        }
+      });
+      setEditingTarifa(null);
+      toast.success('Tarifa atualizada com sucesso');
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao atualizar tarifa');
+    }
   };
 
   return (

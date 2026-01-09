@@ -1,8 +1,10 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState } from 'react';
 import { Layout } from '@/shared/components/Layout';
 import { StatCard } from '@/shared/components/StatCard';
 import { SpotGrid } from '@/shared/components/SpotGrid';
-import { vagas, getEstatisticas, movimentacoes } from '@/shared/services/mockData';
+import { useDashboard } from '@/shared/hooks/useDashboard';
+import { useVagas } from '@/shared/hooks/useVagas';
+import { useMovimentacoesAtivas } from '@/shared/hooks/useMovimentacoes';
 import { ParkingCircle, Car, CheckCircle, Wrench, DollarSign } from 'lucide-react';
 import { Vaga } from '@/shared/types/parking';
 import {
@@ -15,25 +17,39 @@ import {
 import { cn } from '@/shared/lib/utils';
 
 export default function Dashboard() {
-  const [stats, setStats] = useState(getEstatisticas());
+  const { data: stats, isLoading, isError } = useDashboard();
+  const { data: allVagas = [] } = useVagas();
+  const { data: activeMovimentacoes = [] } = useMovimentacoesAtivas();
   const [selectedSpot, setSelectedSpot] = useState<Vaga | null>(null);
-  const [allVagas, setAllVagas] = useState(vagas);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStats(getEstatisticas());
-      setAllVagas([...vagas]);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleSpotClick = (vaga: Vaga) => {
     setSelectedSpot(vaga);
   };
 
   const getMovimentacaoForVaga = (vagaId: string) => {
-    return movimentacoes.find(m => m.vaga_id === vagaId && !m.saida);
+    return activeMovimentacoes.find(m => m.vaga.id === vagaId);
   };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex h-full items-center justify-center p-8">
+          <p className="text-muted-foreground">Carregando dashboard...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (isError || !stats) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <p className="mb-2 text-destructive">Erro ao carregar dados do dashboard.</p>
+          <p className="text-sm text-muted-foreground">Verifique se o backend está rodando em http://localhost:3000</p>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -41,7 +57,7 @@ export default function Dashboard() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
           <p className="mt-1 text-muted-foreground">
-            VisÃ£o geral do estacionamento em tempo real
+            Visão geral do estacionamento em tempo real
           </p>
         </div>
 
@@ -54,7 +70,7 @@ export default function Dashboard() {
           <StatCard
             title="Ocupadas"
             value={stats.ocupadas}
-            subtitle={`${stats.percentual_ocupacao}% ocupaÃ§Ã£o`}
+            subtitle={`${stats.percentualOcupacao}% ocupação`}
             icon={<Car className="h-6 w-6" />}
             variant="danger"
           />
@@ -65,14 +81,14 @@ export default function Dashboard() {
             variant="success"
           />
           <StatCard
-            title="ManutenÃ§Ã£o"
-            value={stats.manutencao}
+            title="Manutenção"
+            value={0} // Backend doesn't return manutencao count yet in stats DTO, only total/ocupadas/livres. Assuming 0 or calculated.
             icon={<Wrench className="h-6 w-6" />}
             variant="warning"
           />
           <StatCard
             title="Receita do Dia"
-            value={`R$ ${stats.receita_dia.toFixed(2)}`}
+            value={`R$ 0,00`} // Backend doesn't return revenue yet.
             icon={<DollarSign className="h-6 w-6" />}
           />
         </div>

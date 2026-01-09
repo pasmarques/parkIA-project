@@ -20,6 +20,7 @@ export interface Tarifa {
 }
 
 export interface Movimentacao {
+  vaga_id: string;
   id: string;
   vaga: Vaga;
   placa: string;

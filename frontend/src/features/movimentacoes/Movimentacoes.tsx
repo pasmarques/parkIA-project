@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Layout } from '@/shared/components/Layout';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
@@ -26,7 +26,9 @@ import {
 } from '@/shared/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { ScrollArea } from '@/shared/ui/scroll-area';
-import { vagas, movimentacoes, validarPlaca, registrarEntrada, registrarSaida, calcularValor } from '@/shared/services/mockData';
+import { useVagas } from '@/shared/hooks/useVagas';
+import { useTarifas } from '@/shared/hooks/useTarifas';
+import { useMovimentacoesAtivas, useMovimentacoesActions } from '@/shared/hooks/useMovimentacoes';
 import { VehicleType } from '@/shared/types/parking';
 import { LogIn, LogOut, Car, Bike, Clock, CheckCircle, Accessibility } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -35,6 +37,11 @@ import { toast } from 'sonner';
 import { cn } from '@/shared/lib/utils';
 
 export default function Movimentacoes() {
+  const { data: allVagas = [] } = useVagas({ status: 'livre' });
+  const { data: activeMovimentacoes = [] } = useMovimentacoesAtivas();
+  const { data: allTarifas = [] } = useTarifas();
+  const { registrarEntrada, registrarSaida } = useMovimentacoesActions();
+
   const [entradaForm, setEntradaForm] = useState({
     vagaId: '',
     placa: '',
@@ -46,67 +53,111 @@ export default function Movimentacoes() {
     valor: number;
     tempo: string;
   } | null>(null);
-  const [activeMovimentacoes, setActiveMovimentacoes] = useState(movimentacoes);
 
-  const vagasLivres = useMemo(() => vagas.filter(v => v.status === 'livre'), []);
+  const validarPlaca = (placa: string): boolean => {
+    const padrao1 = /^[A-Z]{3}-\d{4}$/;
+    const padrao2 = /^[A-Z]{3}\d[A-Z]\d{2}$/;
+    return padrao1.test(placa.toUpperCase()) || padrao2.test(placa.toUpperCase());
+  };
 
-  const handleEntrada = () => {
+  const calcularValor = (entrada: Date, saida: Date, tipoVeiculo: VehicleType): number => {
+    const tarifa = allTarifas.find(t => t.tipo_veiculo === tipoVeiculo);
+    if (!tarifa) return 0;
+
+    const diffMs = saida.getTime() - entrada.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+    if (diffMinutes <= tarifa.tolerancia_minutos) {
+      return 0;
+    }
+
+    const diffHours = Math.ceil(diffMinutes / 60);
+    
+    if (diffHours <= 1) {
+      return tarifa.valor_primeira_hora;
+    }
+
+    return tarifa.valor_primeira_hora + (diffHours - 1) * tarifa.valor_hora_adicional;
+  };
+
+  const handleEntrada = async () => {
     if (!entradaForm.vagaId || !entradaForm.placa || !entradaForm.tipoVeiculo) {
       toast.error('Preencha todos os campos');
       return;
     }
 
     if (!validarPlaca(entradaForm.placa)) {
-      toast.error('Formato de placa invÃ¡lido. Use ABC-1234 ou ABC1D23');
+      toast.error('Formato de placa inválido. Use ABC-1234 ou ABC1D23');
       return;
     }
 
-    const result = registrarEntrada(entradaForm.vagaId, entradaForm.placa, entradaForm.tipoVeiculo);
-    
-    if (result) {
+    try {
+      await registrarEntrada({
+        vagaId: entradaForm.vagaId,
+        placa: entradaForm.placa,
+        tipoVeiculo: entradaForm.tipoVeiculo as VehicleType,
+      });
+      
       toast.success(`Entrada registrada para ${entradaForm.placa.toUpperCase()}`);
       setEntradaForm({ vagaId: '', placa: '', tipoVeiculo: '' });
-      setActiveMovimentacoes([...movimentacoes]);
-    } else {
-      toast.error('NÃ£o foi possÃ­vel registrar a entrada. Verifique se a vaga estÃ¡ livre.');
+    } catch (error) {
+      console.error(error);
+      toast.error('Não foi possível registrar a entrada. Verifique se a vaga está livre.');
     }
   };
 
-  const handleBuscarSaida = () => {
-    if (!saidaPlaca) {
-      toast.error('Digite a placa do veÃ­culo');
+  const handleBuscarSaida = (placaOverride?: string) => {
+    const placaBusca = placaOverride || saidaPlaca;
+
+    if (!placaBusca) {
+      toast.error('Digite a placa do veículo');
       return;
     }
 
-    const mov = movimentacoes.find(m => m.placa.toUpperCase() === saidaPlaca.toUpperCase() && !m.saida);
+    const mov = activeMovimentacoes.find(m => m.placa.toUpperCase() === placaBusca.toUpperCase() && !m.saida);
     
     if (!mov) {
-      toast.error('VeÃ­culo nÃ£o encontrado no pÃ¡tio');
+      toast.error('Veículo não encontrado no pátio');
       return;
     }
 
-    const valor = calcularValor(new Date(mov.entrada), new Date(), mov.tipo_veiculo);
-    const tempo = formatDistanceToNow(new Date(mov.entrada), { locale: ptBR });
+    try {
+      const entradaDate = new Date(mov.entrada);
+      if (isNaN(entradaDate.getTime())) {
+        console.error('Data de entrada inválida:', mov.entrada);
+        toast.error('Erro nos dados da movimentação: Data de entrada inválida');
+        return;
+      }
 
-    setSaidaDialog({
-      placa: mov.placa,
-      valor,
-      tempo,
-    });
+      const valor = calcularValor(entradaDate, new Date(), mov.tipo_veiculo);
+      const tempo = formatDistanceToNow(entradaDate, { locale: ptBR });
+
+      setSaidaDialog({
+        placa: mov.placa,
+        valor,
+        tempo,
+      });
+    } catch (error) {
+      console.error('Erro ao processar movimentação:', error);
+      toast.error('Erro ao processar dados da movimentação');
+    }
   };
 
-  const handleConfirmarSaida = () => {
+  const handleConfirmarSaida = async () => {
     if (!saidaDialog) return;
 
-    const result = registrarSaida(saidaDialog.placa);
-    
-    if (result) {
-      toast.success(`SaÃ­da registrada. Valor: R$ ${result.valor.toFixed(2)}`);
+    try {
+      await registrarSaida({ placa: saidaDialog.placa });
+      
+      // Como o valor real é calculado no backend, aqui usamos o estimado ou apenas avisamos o sucesso
+      // Se a API retornasse o valor, poderíamos usar. Por enquanto, mantemos o valor estimado do dialog.
+      toast.success(`Saída registrada. Valor estimado: R$ ${saidaDialog.valor.toFixed(2)}`);
+      
       setSaidaDialog(null);
       setSaidaPlaca('');
-      setActiveMovimentacoes([...movimentacoes]);
-    } else {
-      toast.error('Erro ao registrar saÃ­da');
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro ao registrar saída');
     }
   };
 
@@ -131,9 +182,9 @@ export default function Movimentacoes() {
       <div className="space-y-6">
 
         <div>
-          <h1 className="text-3xl font-bold text-foreground">MovimentaÃ§Ãµes</h1>
+          <h1 className="text-3xl font-bold text-foreground">Movimentações</h1>
           <p className="mt-1 text-muted-foreground">
-            Registrar entrada e saÃ­da de veÃ­culos
+            Registrar entrada e saída de veículos
           </p>
         </div>
 
@@ -145,7 +196,7 @@ export default function Movimentacoes() {
             </TabsTrigger>
             <TabsTrigger value="saida" className="gap-2">
               <LogOut className="h-4 w-4" />
-              SaÃ­da
+              Saída
             </TabsTrigger>
           </TabsList>
 
@@ -160,7 +211,7 @@ export default function Movimentacoes() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="placa">Placa do VeÃ­culo</Label>
+                    <Label htmlFor="placa">Placa do Veículo</Label>
                     <Input
                       id="placa"
                       placeholder="ABC-1234 ou ABC1D23"
@@ -172,7 +223,7 @@ export default function Movimentacoes() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="tipo">Tipo de VeÃ­culo</Label>
+                    <Label htmlFor="tipo">Tipo de Veículo</Label>
                     <Select
                       value={entradaForm.tipoVeiculo}
                       onValueChange={(value) => setEntradaForm(prev => ({ ...prev, tipoVeiculo: value as VehicleType }))}
@@ -205,7 +256,7 @@ export default function Movimentacoes() {
                         <SelectValue placeholder="Selecione uma vaga livre" />
                       </SelectTrigger>
                       <SelectContent>
-                        {vagasLivres.map((vaga) => (
+                        {allVagas.map((vaga) => (
                           <SelectItem key={vaga.id} value={vaga.id}>
                             {vaga.numero} - {vaga.tipo === 'deficiente' ? 'Deficiente' : vaga.tipo.charAt(0).toUpperCase() + vaga.tipo.slice(1)}
                           </SelectItem>
@@ -222,11 +273,11 @@ export default function Movimentacoes() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Vagas DisponÃ­veis ({vagasLivres.length})</CardTitle>
+                  <CardTitle>Vagas Disponíveis ({allVagas.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-4 gap-3">
-                    {vagasLivres.slice(0, 12).map((vaga) => (
+                    {allVagas.slice(0, 12).map((vaga) => (
                       <button
                         key={vaga.id}
                         onClick={() => setEntradaForm(prev => ({ ...prev, vagaId: vaga.id }))}
@@ -248,9 +299,9 @@ export default function Movimentacoes() {
                       </button>
                     ))}
                   </div>
-                  {vagasLivres.length > 12 && (
+                  {allVagas.length > 12 && (
                     <p className="mt-4 text-center text-sm text-muted-foreground">
-                      +{vagasLivres.length - 12} vagas disponÃ­veis
+                      +{allVagas.length - 12} vagas disponíveis
                     </p>
                   )}
                 </CardContent>
@@ -264,7 +315,7 @@ export default function Movimentacoes() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <LogOut className="h-5 w-5" />
-                    Registrar SaÃ­da
+                    Registrar Saída
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -276,10 +327,16 @@ export default function Movimentacoes() {
                         placeholder="ABC-1234"
                         value={saidaPlaca}
                         onChange={(e) => setSaidaPlaca(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleBuscarSaida();
+                          }
+                        }}
                         className="plate-input flex-1"
                         maxLength={8}
                       />
-                      <Button onClick={handleBuscarSaida} variant="outline">
+                      <Button onClick={() => handleBuscarSaida()} variant="outline">
                         Buscar
                       </Button>
                     </div>
@@ -291,7 +348,7 @@ export default function Movimentacoes() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5" />
-                    VeÃ­culos no PÃ¡tio ({activeMovimentacoes.length})
+                    Veículos no Pátio ({activeMovimentacoes.length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -300,17 +357,19 @@ export default function Movimentacoes() {
                       {activeMovimentacoes.length === 0 ? (
                         <div className="py-8 text-center text-muted-foreground">
                           <Car className="mx-auto mb-2 h-12 w-12 opacity-50" />
-                          <p>Nenhum veÃ­culo no pÃ¡tio</p>
+                          <p>Nenhum veículo no pátio</p>
                         </div>
                       ) : (
                         activeMovimentacoes.map((mov) => {
                           const Icon = getVehicleIcon(mov.tipo_veiculo);
                           return (
                             <button
+                              type="button"
                               key={mov.id}
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
                                 setSaidaPlaca(mov.placa);
-                                handleBuscarSaida();
+                                handleBuscarSaida(mov.placa);
                               }}
                               className="flex w-full items-center justify-between rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
                             >
@@ -342,7 +401,7 @@ export default function Movimentacoes() {
       <Dialog open={!!saidaDialog} onOpenChange={() => setSaidaDialog(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar SaÃ­da</DialogTitle>
+            <DialogTitle>Confirmar Saída</DialogTitle>
             <DialogDescription>
               Revise os dados antes de confirmar
             </DialogDescription>
@@ -356,7 +415,7 @@ export default function Movimentacoes() {
                   <span className="font-mono font-medium">{saidaDialog.placa}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tempo de permanÃªncia</span>
+                  <span className="text-muted-foreground">Tempo de permanência</span>
                   <span className="font-medium">{saidaDialog.tempo}</span>
                 </div>
                 <div className="flex justify-between border-t border-border pt-3">
@@ -370,7 +429,7 @@ export default function Movimentacoes() {
               {saidaDialog.valor === 0 && (
                 <div className="flex items-center gap-2 rounded-lg bg-spot-free/10 p-3 text-sm text-spot-free">
                   <CheckCircle className="h-4 w-4" />
-                  Dentro do perÃ­odo de tolerÃ¢ncia (gratuito)
+                  Dentro do período de tolerância (gratuito)
                 </div>
               )}
             </div>
@@ -381,7 +440,7 @@ export default function Movimentacoes() {
               Cancelar
             </Button>
             <Button onClick={handleConfirmarSaida}>
-              Confirmar SaÃ­da
+              Confirmar Saída
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -389,4 +448,3 @@ export default function Movimentacoes() {
     </Layout>
   );
 }
-

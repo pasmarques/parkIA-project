@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table';
-import { historicoMovimentacoes } from '@/shared/services/mockData';
+import { useHistoricoMovimentacoes } from '@/shared/hooks/useMovimentacoes';
 import { History, Search, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -28,25 +28,16 @@ export default function Historico() {
   const [dataFim, setDataFim] = useState('');
   const [placaFiltro, setPlacaFiltro] = useState('');
 
-  const filteredHistorico = historicoMovimentacoes.filter((mov) => {
-    let matches = true;
+  const { data: historico = [] } = useHistoricoMovimentacoes({
+    dataInicio: dataInicio || undefined,
+    dataFim: dataFim || undefined
+  });
 
+  const filteredHistorico = historico.filter((mov) => {
     if (placaFiltro) {
-      matches = matches && mov.placa.toUpperCase().includes(placaFiltro.toUpperCase());
+      return mov.placa.toUpperCase().includes(placaFiltro.toUpperCase());
     }
-
-    if (dataInicio) {
-      const inicio = new Date(dataInicio);
-      matches = matches && new Date(mov.entrada) >= inicio;
-    }
-
-    if (dataFim) {
-      const fim = new Date(dataFim);
-      fim.setHours(23, 59, 59);
-      matches = matches && new Date(mov.entrada) <= fim;
-    }
-
-    return matches;
+    return true;
   });
 
   const totalReceita = filteredHistorico.reduce((acc, mov) => acc + (mov.valor_pago || 0), 0);
