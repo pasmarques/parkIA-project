@@ -103,9 +103,17 @@ export default function Movimentacoes() {
       
       toast.success(`Entrada registrada para ${entradaForm.placa.toUpperCase()}`);
       setEntradaForm({ vagaId: '', placa: '', tipoVeiculo: '' });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('Não foi possível registrar a entrada. Verifique se a vaga está livre.');
+      const errorMessage = error.response?.data?.message;
+      
+      if (errorMessage) {
+        // Se for array (erros de validação), pega o primeiro
+        const message = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
+        toast.error(message);
+      } else {
+        toast.error('Não foi possível registrar a entrada. Verifique se a vaga está livre.');
+      }
     }
   };
 
@@ -161,9 +169,15 @@ export default function Movimentacoes() {
       
       setSaidaDialog(null);
       setSaidaPlaca('');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('Erro ao registrar saída');
+      const errorMessage = error.response?.data?.message;
+      if (errorMessage) {
+         const message = Array.isArray(errorMessage) ? errorMessage[0] : errorMessage;
+         toast.error(message);
+      } else {
+        toast.error('Erro ao registrar saída');
+      }
     }
   };
 
