@@ -45,4 +45,4 @@ RUN npm install --save-dev ts-node typescript @types/node
 EXPOSE 3000
 
 # Start application
-CMD ["node", "dist/main.js"]
+CMD ["/bin/sh", "-c", "npm run migration:prod && npm run seed:prod && node dist/main.js"]
