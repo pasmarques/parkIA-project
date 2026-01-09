@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.build.json",
     "seed": "ts-node src/seeds/seed.ts",
     "seed:prod": "NODE_ENV=production node dist/seeds/seed.js",
+    "migration:prod": "NODE_ENV=production node dist/database/run-migrations.js",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
