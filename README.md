@@ -59,11 +59,11 @@ A maneira mais simples de testar a aplicação é utilizando o Docker Compose. I
 
 3. **Acesse:**
    - **Frontend:** [http://localhost:8080](http://localhost:8080)
-   - **Backend API:** [http://localhost:3001/api/v1](http://localhost:3001/api/v1)
-   - **Documentação API (Swagger):** [http://localhost:3001/api/docs](http://localhost:3001/api/docs)
+   - **Backend API:** [http://localhost:3000/api/v1](http://localhost:3000/api/v1)
+   - **Documentação API (Swagger):** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
      > 💡 **Dica:** Para verificar **exemplos de uso da API**, esquemas de dados e realizar testes, utilize a documentação interativa do Swagger.
 
-> **Nota:** O build inicial pode levar alguns minutos. O frontend estará disponível na porta 8080 e o backend na porta 3001 para evitar conflitos com serviços locais.
+> **Nota:** O build inicial pode levar alguns minutos. O frontend estará disponível na porta 8080 e o backend na porta 3000.
 
 ---
 

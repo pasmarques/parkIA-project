@@ -21,6 +21,7 @@ services:
       dockerfile: Dockerfile
     container_name: parkia-backend
     environment:
+      DATABASE_URL: postgres://admin:password123@postgres:5432/parkia_db
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USERNAME: admin
@@ -28,7 +29,7 @@ services:
       DB_DATABASE: parkia_db
       PORT: 3000
     ports:
-      - "3001:3000"
+      - "3000:3000"
     depends_on:
       - postgres
     networks:
@@ -42,7 +43,7 @@ services:
       dockerfile: Dockerfile
       args:
         # Aponta para o localhost do navegador do usuário, pois o JS roda no cliente
-        VITE_API_URL: http://localhost:3001/api/v1
+        VITE_API_URL: http://localhost:3000/api/v1
     container_name: parkia-frontend
     ports:
       - "8080:80"
