@@ -69,18 +69,34 @@ A maneira mais simples de testar a aplicação é utilizando o Docker Compose. I
 
 ## 💻 Como Rodar Manualmente (Sem Docker)
 
-Se preferir rodar cada serviço individualmente:
+Se preferir rodar cada serviço individualmente (ambiente de desenvolvimento):
 
 ### 1. Banco de Dados
-Certifique-se de ter um PostgreSQL rodando e configure as variáveis de ambiente no arquivo `.env` do backend.
+Certifique-se de ter um PostgreSQL rodando em sua máquina. Crie um banco de dados chamado `parkia_db`.
 
 ### 2. Backend
-```bash
-cd backend
-npm install
-# Configure o .env com suas credenciais do banco
-npm run start:dev
-```
+1.  Acesse a pasta do backend:
+    ```bash
+    cd backend
+    ```
+2.  Instale as dependências:
+    ```bash
+    npm install
+    ```
+3.  Crie um arquivo `.env` na raiz da pasta `backend` com a conexão do banco:
+    ```env
+    DATABASE_URL=postgres://seu_usuario:sua_senha@localhost:5432/parkia_db
+    PORT=3000
+    ```
+4.  Execute as migrações (criar tabelas) e seeds (dados iniciais):
+    ```bash
+    npm run migration:run
+    npm run seed
+    ```
+5.  Inicie o servidor:
+    ```bash
+    npm run start:dev
+    ```
 
 ### 3. Frontend
 ```bash
