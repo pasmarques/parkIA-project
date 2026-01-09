@@ -1,73 +1,58 @@
-# Welcome to your Lovable project
+# Documentação Técnica do Frontend - ParkIA
 
-## Project info
+Este documento detalha as decisões técnicas, arquiteturais e de design adotadas no desenvolvimento do frontend da aplicação ParkIA. O objetivo é fornecer uma visão clara sobre como a aplicação foi estruturada e as justificativas para as escolhas tecnológicas.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Visão Geral da Arquitetura
 
-## How can I edit this code?
+A aplicação foi construída utilizando **React** com **TypeScript**, servida através do **Vite**. A arquitetura segue uma abordagem modular, priorizando a separação de responsabilidades e a manutenibilidade a longo prazo.
 
-There are several ways of editing your application.
+### Estrutura de Pastas e Organização
 
-**Use Lovable**
+Optou-se por uma estrutura baseada em funcionalidades (Feature-based Architecture) em vez da separação tradicional por tipos de arquivo. Esta decisão visa facilitar a escalabilidade do projeto.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **src/features/**: Contém o código específico de cada domínio de negócio (ex: Dashboard, Gestão de Vagas, Histórico). Cada funcionalidade encapsula seus próprios componentes, hooks e lógica, mantendo o acoplamento baixo.
+- **src/shared/**: Armazena componentes reutilizáveis (UI Kit), utilitários, hooks globais e definições de tipos que são compartilhados por toda a aplicação.
 
-Changes made via Lovable will be committed automatically to this repo.
+Essa organização permite que um desenvolvedor entenda todo o contexto de uma funcionalidade específica sem precisar navegar por diversas pastas dispersas.
 
-**Use your preferred IDE**
+## Decisões Técnicas Principais
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Gerenciamento de Estado e Dados (TanStack Query)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Para a comunicação com a API e gerenciamento do estado do servidor, foi adotada a biblioteca **TanStack Query (React Query)**.
 
-Follow these steps:
+**Justificativa:**
+O estado do servidor (dados vindos da API) possui características diferentes do estado da interface (UI). O React Query foi escolhido porque:
+1.  **Gerenciamento de Cache:** Automatiza o cacheamento, invalidação e atualização de dados em segundo plano, garantindo que o usuário sempre veja informações atualizadas sem recarregamentos desnecessários.
+2.  **Estados de Carregamento e Erro:** Fornece nativamente indicadores de `isLoading` e `isError`, simplificando a lógica nos componentes visuais.
+3.  **Otimização de Performance:** Evita requisições duplicadas e gerencia o ciclo de vida dos dados de forma eficiente, reduzindo a carga no backend.
+4.  **Eliminação de Boilerplate:** Remove a necessidade de `useEffect` complexos e gerenciamento manual de estado global (como Redux) para dados assíncronos.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Interface de Usuário e Estilização (Tailwind CSS e shadcn/ui)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+A camada visual foi construída utilizando **Tailwind CSS** em conjunto com **shadcn/ui**.
 
-# Step 3: Install the necessary dependencies.
-npm i
+**Justificativa:**
+-   **Tailwind CSS:** Permite um desenvolvimento rápido através de classes utilitárias, garantindo consistência no design system (espaçamentos, cores, tipografia) e facilitando a implementação de responsividade.
+-   **shadcn/ui:** Diferente de bibliotecas de componentes tradicionais, o shadcn/ui fornece componentes acessíveis (baseados no Radix UI) que são copiados diretamente para o código do projeto. Isso oferece controle total sobre a implementação e estilização, evitando as limitações de customização comuns em bibliotecas "caixa preta" como Material UI ou Bootstrap.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+### Experiência do Usuário (UX) e Skeleton Loading
 
-**Edit a file directly in GitHub**
+Para melhorar a percepção de performance, implementou-se o padrão de **Skeleton Screens** (telas de esqueleto) em substituição aos indicadores de carregamento tradicionais (spinners).
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+**Justificativa:**
+-   **Percepção de Velocidade:** O Skeleton exibe uma estrutura visual da página antes que os dados sejam carregados, reduzindo a ansiedade do usuário e criando a sensação de que a aplicação é mais rápida.
+-   **Estabilidade Visual (CLS):** Ao reservar o espaço que o conteúdo ocupará, evita-se o "Cumulative Layout Shift" (mudança repentina de layout), onde elementos pulam na tela quando os dados chegam.
+-   **Consistência:** Os componentes de Skeleton foram centralizados em `src/shared/components/Skeletons.tsx` para garantir uniformidade visual em todas as telas (Dashboard, Vagas, Movimentações).
 
-**Use GitHub Codespaces**
+### Responsividade e Mobile-First
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+A aplicação foi projetada para ser totalmente responsiva, adaptando-se de desktops a dispositivos móveis pequenos.
 
-## What technologies are used for this project?
+**Estratégias adotadas:**
+-   **Sidebar Adaptável:** Em telas desktop, a navegação é fixa lateralmente. Em dispositivos móveis, ela se transforma em um menu "Sheet" (gaveta) acessível via botão de hambúrguer, otimizando o espaço de tela.
+-   **Vistas Alternativas:** Listas de dados complexas (como tabelas de vagas) são automaticamente convertidas para visualizações em "Cards" em dispositivos móveis, garantindo legibilidade sem a necessidade de rolagem horizontal excessiva.
 
-This project is built with:
+## Qualidade de Código e Tipagem
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+O uso estrito de **TypeScript** foi mandatório para garantir a robustez do código. Interfaces claras foram definidas para todas as entidades (Vagas, Movimentações), prevenindo erros em tempo de execução e melhorando a experiência de desenvolvimento com autocompletar e validação estática.
