@@ -1,4 +1,4 @@
-﻿import { Vaga, SpotType } from '@/shared/types/parking';
+import { Vaga, SpotType } from '@/shared/types/parking';
 import { SpotCard } from './SpotCard';
 import { useState, useMemo } from 'react';
 import { Button } from '@/shared/ui/button';
@@ -83,7 +83,7 @@ export function SpotGrid({ vagas, onSpotClick }: SpotGridProps) {
         </div>
         <div className="flex items-center gap-2">
           <div className="h-3 w-3 rounded bg-spot-maintenance" />
-          <span className="text-muted-foreground">ManutenÃ§Ã£o</span>
+          <span className="text-muted-foreground">Manutenção</span>
         </div>
       </div>
 

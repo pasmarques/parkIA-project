@@ -121,7 +121,7 @@ export default function Dashboard() {
                   )}>
                     {selectedSpot.status === 'ocupada' && 'Ocupada'}
                     {selectedSpot.status === 'livre' && 'Livre'}
-                    {selectedSpot.status === 'manutencao' && 'ManutenÃ§Ã£o'}
+                    {selectedSpot.status === 'manutencao' && 'Manutenção'}
                   </span>
                 </div>
                 <div>
@@ -132,7 +132,7 @@ export default function Dashboard() {
 
               {selectedSpot.status === 'ocupada' && (
                 <div className="rounded-lg bg-muted p-4 space-y-3">
-                  <p className="font-semibold text-foreground">VeÃ­culo Atual</p>
+                  <p className="font-semibold text-foreground">Veículo Atual</p>
                   {(() => {
                     const mov = getMovimentacaoForVaga(selectedSpot.id);
                     if (mov) {
@@ -158,7 +158,7 @@ export default function Dashboard() {
                         </div>
                       );
                     }
-                    return <p className="text-sm text-muted-foreground">InformaÃ§Ãµes nÃ£o disponÃ­veis</p>;
+                    return <p className="text-sm text-muted-foreground">Informações não disponíveis</p>;
                   })()}
                 </div>
               )}
@@ -166,7 +166,7 @@ export default function Dashboard() {
               {selectedSpot.status === 'livre' && (
                 <div className="rounded-lg bg-spot-free/10 border border-spot-free/20 p-4">
                   <p className="text-sm text-muted-foreground">
-                    Esta vaga estÃ¡ disponÃ­vel para estacionamento.
+                    Esta vaga está disponível para estacionamento.
                   </p>
                 </div>
               )}
@@ -174,7 +174,7 @@ export default function Dashboard() {
               {selectedSpot.status === 'manutencao' && (
                 <div className="rounded-lg bg-spot-maintenance/10 border border-spot-maintenance/20 p-4">
                   <p className="text-sm text-muted-foreground">
-                    Esta vaga estÃ¡ em manutenÃ§Ã£o e nÃ£o pode ser utilizada.
+                    Esta vaga está em manutenção e não pode ser utilizada.
                   </p>
                 </div>
               )}

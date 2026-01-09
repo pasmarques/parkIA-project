@@ -1,4 +1,4 @@
-﻿import { ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Car, Settings, History, ParkingCircle } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
@@ -9,9 +9,9 @@ interface LayoutProps {
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/movimentacoes', label: 'MovimentaÃ§Ãµes', icon: Car },
-  { href: '/historico', label: 'HistÃ³rico', icon: History },
-  { href: '/gestao', label: 'GestÃ£o', icon: Settings },
+  { href: '/movimentacoes', label: 'Movimentações', icon: Car },
+  { href: '/historico', label: 'Histórico', icon: History },
+  { href: '/gestao', label: 'Gestão', icon: Settings },
 ];
 
 export function Layout({ children }: LayoutProps) {
@@ -56,7 +56,7 @@ export function Layout({ children }: LayoutProps) {
           <div className="border-t border-border p-4">
             <div className="rounded-lg bg-muted p-4">
               <p className="text-xs text-muted-foreground">
-                Sistema de GestÃ£o
+                Sistema de Gestão
               </p>
               <p className="text-sm font-medium text-foreground">v1.0.0</p>
             </div>
