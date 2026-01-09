@@ -45,6 +45,7 @@ export interface VagaEstatisticasDto {
   ocupadas: number;
   livres: number;
   percentualOcupacao: number;
+  receitaDoDia: number;
 }
 
 // DTOs para criação e atualização

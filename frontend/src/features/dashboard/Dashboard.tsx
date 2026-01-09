@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Layout } from '@/shared/components/Layout';
 import { StatCard } from '@/shared/components/StatCard';
 import { SpotGrid } from '@/shared/components/SpotGrid';
@@ -88,7 +88,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Receita do Dia"
-            value={`R$ 0,00`} // Backend doesn't return revenue yet.
+            value={`R$ ${(stats.receitaDoDia || 0).toFixed(2).replace('.', ',')}`}
             icon={<DollarSign className="h-6 w-6" />}
           />
         </div>

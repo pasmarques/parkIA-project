@@ -155,11 +155,9 @@ export default function Movimentacoes() {
     if (!saidaDialog) return;
 
     try {
-      await registrarSaida({ placa: saidaDialog.placa });
+      const mov = await registrarSaida({ placa: saidaDialog.placa });
       
-      // Como o valor real é calculado no backend, aqui usamos o estimado ou apenas avisamos o sucesso
-      // Se a API retornasse o valor, poderíamos usar. Por enquanto, mantemos o valor estimado do dialog.
-      toast.success(`Saída registrada. Valor estimado: R$ ${saidaDialog.valor.toFixed(2)}`);
+      toast.success(`Saída registrada. Valor: R$ ${Number(mov.valor_pago).toFixed(2)}`);
       
       setSaidaDialog(null);
       setSaidaPlaca('');

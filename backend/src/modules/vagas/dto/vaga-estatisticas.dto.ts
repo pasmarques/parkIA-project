@@ -3,4 +3,5 @@ export class VagaEstatisticasDto {
   ocupadas!: number;
   livres!: number;
   percentualOcupacao!: number;
+  receitaDoDia!: number;
 }

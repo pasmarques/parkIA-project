@@ -11,8 +11,9 @@ export const movimentacoesService = {
     await api.post('/movimentacoes/entrada', dto);
   },
 
-  registrarSaida: async (dto: RegistrarSaidaDto): Promise<void> => {
-    await api.post('/movimentacoes/saida', dto);
+  registrarSaida: async (dto: RegistrarSaidaDto): Promise<Movimentacao> => {
+    const response = await api.post<Movimentacao>('/movimentacoes/saida', dto);
+    return response.data;
   },
 
   listarAtivas: async (): Promise<Movimentacao[]> => {

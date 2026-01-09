@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Vaga } from './entities/vaga.entity';
+import { Movimentacao } from '../movimentacoes/entities/movimentacao.entity';
 import { CreateVagaDto } from './dto/create-vaga.dto';
 import { UpdateVagaDto } from './dto/update-vaga.dto';
 import { VagaFilterDto } from './dto/vaga-filter.dto';
@@ -13,6 +14,8 @@ export class VagasService {
   constructor(
     @InjectRepository(Vaga)
     private readonly repo: Repository<Vaga>,
+    @InjectRepository(Movimentacao)
+    private readonly movRepo: Repository<Movimentacao>,
   ) {}
 
   async findAll(filter: VagaFilterDto): Promise<Vaga[]> {
@@ -72,11 +75,26 @@ export class VagasService {
 
     const percentualOcupacao = total > 0 ? (ocupadas / total) * 100 : 0;
 
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const movimentacoesHoje = await this.movRepo.find({
+      where: {
+        saida: Between(startOfDay, endOfDay)
+      }
+    });
+
+    const receitaDoDia = movimentacoesHoje.reduce((acc, mov) => acc + Number(mov.valor_pago || 0), 0);
+
     return {
       total,
       ocupadas,
       livres,
       percentualOcupacao,
+      receitaDoDia,
     } as VagaEstatisticasDto;
   }
 }
