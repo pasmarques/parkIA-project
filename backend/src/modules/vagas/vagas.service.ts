@@ -72,6 +72,7 @@ export class VagasService {
     const total = await this.repo.count();
     const ocupadas = await this.repo.count({ where: { status: StatusVaga.OCUPADA } });
     const livres = await this.repo.count({ where: { status: StatusVaga.LIVRE } });
+    const manutencao = await this.repo.count({ where: { status: StatusVaga.MANUTENCAO } });
 
     const percentualOcupacao = total > 0 ? (ocupadas / total) * 100 : 0;
 
@@ -93,6 +94,7 @@ export class VagasService {
       total,
       ocupadas,
       livres,
+      manutencao,
       percentualOcupacao,
       receitaDoDia,
     } as VagaEstatisticasDto;

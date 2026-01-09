@@ -82,7 +82,7 @@ export default function Dashboard() {
           />
           <StatCard
             title="Manutenção"
-            value={0} // Backend doesn't return manutencao count yet in stats DTO, only total/ocupadas/livres. Assuming 0 or calculated.
+            value={stats.manutencao}
             icon={<Wrench className="h-6 w-6" />}
             variant="warning"
           />
