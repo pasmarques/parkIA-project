@@ -34,7 +34,7 @@ import { LogIn, LogOut, Car, Bike, Clock, CheckCircle, Accessibility, Loader2 } 
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { cn } from '@/shared/lib/utils';
+import { cn, formatPlate, isValidPlate } from '@/shared/lib/utils';
 
 export default function Movimentacoes() {
   const { data: allVagas = [] } = useVagas({ status: 'livre' });
@@ -54,12 +54,6 @@ export default function Movimentacoes() {
     tempo: string;
   } | null>(null);
   const [isSaidaPending, setIsSaidaPending] = useState(false);
-
-  const validarPlaca = (placa: string): boolean => {
-    const padrao1 = /^[A-Z]{3}-\d{4}$/;
-    const padrao2 = /^[A-Z]{3}\d[A-Z]\d{2}$/;
-    return padrao1.test(placa.toUpperCase()) || padrao2.test(placa.toUpperCase());
-  };
 
   const calcularValor = (entrada: Date, saida: Date, tipoVeiculo: VehicleType): number => {
     const tarifa = allTarifas.find(t => t.tipo_veiculo === tipoVeiculo);
@@ -90,7 +84,7 @@ export default function Movimentacoes() {
       return;
     }
 
-    if (!validarPlaca(entradaForm.placa)) {
+    if (!isValidPlate(entradaForm.placa)) {
       toast.error('Formato de placa inválido. Use ABC-1234 ou ABC1D23');
       return;
     }
@@ -240,9 +234,11 @@ export default function Movimentacoes() {
                       id="placa"
                       placeholder="ABC-1234 ou ABC1D23"
                       value={entradaForm.placa}
-                      onChange={(e) => setEntradaForm(prev => ({ ...prev, placa: e.target.value.toUpperCase() }))}
-                      className="plate-input"
-                      maxLength={8}
+                      onChange={(e) => {
+                        const formatted = formatPlate(e.target.value);
+                        setEntradaForm(prev => ({ ...prev, placa: formatted }));
+                      }}
+                      className="plate-input uppercase"
                     />
                   </div>
 
@@ -348,17 +344,16 @@ export default function Movimentacoes() {
                     <div className="flex gap-2">
                       <Input
                         id="saida-placa"
-                        placeholder="ABC-1234"
+                        placeholder="ABC-1234 ou ABC1D23"
                         value={saidaPlaca}
-                        onChange={(e) => setSaidaPlaca(e.target.value.toUpperCase())}
+                        onChange={(e) => setSaidaPlaca(formatPlate(e.target.value))}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
                             handleBuscarSaida();
                           }
                         }}
-                        className="plate-input flex-1"
-                        maxLength={8}
+                        className="plate-input flex-1 uppercase"
                       />
                       <Button type="button" onClick={() => handleBuscarSaida()} variant="outline">
                         Buscar
