@@ -1,0 +1,59 @@
+services:
+  # Banco de Dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: parkia-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: parkia_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - parkia-network
+
+  # Backend (NestJS)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: parkia-backend
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: admin
+      DB_PASSWORD: password123
+      DB_DATABASE: parkia_db
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - parkia-network
+    restart: unless-stopped
+
+  # Frontend (React + Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Aponta para o localhost do navegador do usuário, pois o JS roda no cliente
+        VITE_API_URL: http://localhost:3000/api/v1
+    container_name: parkia-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - parkia-network
+
+volumes:
+  postgres_data:
+
+networks:
+  parkia-network:
+    driver: bridge
